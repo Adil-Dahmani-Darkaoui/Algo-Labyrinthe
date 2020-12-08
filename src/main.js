@@ -1,9 +1,9 @@
-async function loadJson(size) {
+async function loadJson() {
 
     const data = await fetch('labyrinthes.json')
         .then(response => response.json());
 
-    let gridSize = size;
+    let gridSize = 3;
     let mazeName = 'ex-1';
 
     return {
@@ -58,12 +58,93 @@ function createMaze(mazeBoard) {
 
         mainDiv.appendChild(cell)
     }
+
+    this.visited = false;
+    this.found = false;
+    this.adjacents = [];
+
+    const visited = [];
+    const stack = [];
+    const root = cellData[0];
+    const target = cellData[cellData.length -1];
+
+    target.isTarget = true;
+    stack.push(root);
+
+    while(stack.length) {
+
+        const current = stack.pop();
+
+        if (current === target) {
+            visited.push(current);
+            break;
+        }
+
+        if (visited.indexOf(current) !== -1) {
+            continue;
+        }
+
+        visited.push(current);
+
+        for (let node of current.adjacents) {
+            stack.push(node);
+        }
+        console.log(current.data)
+    }
+}
+
+function getAdjacents(mazeBoard) {
+
+    const {cellData, gridSize} = mazeBoard;
+
+    const adjacentCells = [];
+    let i;
+
+    let top = gridSize[cellData(i, j-1)];
+    let right = gridSize[cellData(i+1, j)];
+    let bottom = gridSize[cellData(i, j+1)];
+    let left = gridSize[cellData(i-1, j)];
+
+    if (!top.visited) {
+        adjacentCells.push(top)
+    }
+    if (!right.visited) {
+        adjacentCells.push(right)
+    }
+    if (!bottom.visited) {
+        adjacentCells.push(bottom)
+    }
+    if (!left.visited) {
+        adjacentCells.push(left)
+    }
+
+
+
+    // recupere les voisins qui n'ont pas de murs
+    // for (let i = 0; i < cellData.length; i++) {
+    //
+    //     let walls = cellData[i]["walls"];
+    //
+    //     for (let j = 0; j < walls.length; j++) {
+    //         if (!walls[j]) {
+    //             adjacentCells.push(cellData[i]['walls'])
+    //         }
+    //     }
+    //
+    //     cellData[i].adjacentsCells = adjacentCells;
+    //     console.log(cellData[i].adjacentsCells)
+    // }
+
 }
 
 async function main() {
     // Async main function to call our maze generator functions
-    let size = prompt("Choice a maze size between 3 to 25");
-    createMaze(await loadJson(size));
+    createMaze(await loadJson());
 }
 
-main();
+async function test() {
+    getAdjacents(await loadJson())
+}
+
+test();
+
