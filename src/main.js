@@ -3,7 +3,7 @@ async function loadJson() {
     const data = await fetch('labyrinthes.json')
         .then(response => response.json());
 
-    let gridSize = 25;
+    let gridSize = 6;
     let mazeName = 'ex-2';
     // console.log(data)
     return {
@@ -65,46 +65,80 @@ function createMaze(mazeBoard) {
             currentCell.adjacentCells.push(currentCell.cellNumber+gridSize);
         }
         mainDiv.appendChild(cell)
-        // console.log('Cell ' + currentCell.cellNumber + ' : ', currentCell)
     }
-    dfs(cellData[0], cellData[cellData.length-1], cellData)
+    iterativeDfs(cellData[0], cellData[cellData.length-1], cellData)
 }
 
-function dfs(startPos, targetPos, grid) {
-    const visited = [];
-    const stack = [];
-    const root = startPos;
-    const target = targetPos;
-    target.isTarget = true;
+    const timer = ms => new Promise(res => setTimeout(res, ms))
 
-    stack.push(root);
+// async function dfs(startPos, targetPos, grid) {
+//     const visited = [];
+//     const stack = [];
+//     const root = startPos;
+//     const target = targetPos;
+//     target.isTarget = true;
+//
+//     stack.push(root);
+//
+//     while (stack.length) {
+//
+//         const current = stack.pop();
+//
+//         let cellToColor = document.getElementsByClassName('cell-' + current.cellNumber);
+//
+//         if (visited.indexOf(current) !== -1) {
+//
+//             continue;
+//         }
+//
+//         if (current.cellNumber !== 0) {
+//             cellToColor[0].style.background = 'mediumpurple'
+//         }
+//         visited.push(current);
+//
+//         if (current === target) {
+//             cellToColor[0].style.background='springgreen'
+//             visited.push(current);
+//             break;
+//         }
+//
+//         for (let node of current.adjacentCells) {
+//             stack.push(grid[node]);
+//         }
+//         await timer(50);
+//     }
+//     console.log(visited, 'Congrats')
+// }
 
-    while(stack.length) {
-        // debugger
+async function iterativeDfs(grid, vertex, target) {
 
-        const current = stack.pop();
-        let test = document.getElementsByClassName('cell-'+current.cellNumber);
+    let stack = [];
+    stack.push(vertex);
 
-        if (current === target) {
-            visited.push(current);
-            break;
+    let cellToColor = document.getElementsByClassName('cell-' + vertex.cellNumber);
+
+    while (stack.length) {
+
+        if (vertex === target) {
+            console.log("Congrats, you reached the final cell ");
+            break
         }
 
-        if (visited.indexOf(current) !== -1) {
-            continue;
-        }
-        if(current.cellNumber !== 0){
-            test[0].style.background='mediumpurple'
-        }
-        visited.push(current);
+        vertex = stack.pop();
 
-        for (let node of current.adjacentCells) {
-            stack.push(grid[node]);
+        if (!vertex.visited) {
+            vertex.visited = true;
+            stack.push(vertex);
+            console.log(vertex.cellNumber);
+
+            for (let node of vertex.adjacentCells) {
+                cellToColor[0].style.background = 'mediumpurple';
+                stack.push(grid[node])
+            }
         }
+        await timer(50)
     }
-    console.log(visited, 'Congrats')
 }
-
 
 async function main() {
     // Async main function to call our maze generator functions
