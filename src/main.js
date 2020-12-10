@@ -3,8 +3,8 @@ async function loadJson() {
     const data = await fetch('labyrinthes.json')
         .then(response => response.json());
 
-    let gridSize = 6;
-    let mazeName = 'ex-2';
+    let gridSize = 15;
+    let mazeName = 'ex-0';
     // console.log(data)
     return {
         gridSize: gridSize,
@@ -65,84 +65,145 @@ function createMaze(mazeBoard) {
             currentCell.adjacentCells.push(currentCell.cellNumber+gridSize);
         }
         mainDiv.appendChild(cell)
+        // console.log('Cell ' + currentCell.cellNumber + ' : ', currentCell)
     }
-    iterativeDfs(cellData[0], cellData[cellData.length-1], cellData)
+    document.getElementById('dfsIterative').addEventListener('click', function() {
+        dfsIterative(cellData[0], cellData);
+    }, false);
+    document.getElementById('dfsRecursive').addEventListener('click', function() {
+        dfsRecursive(cellData[0], cellData);
+    }, false);
+    document.getElementById('bfsIterative').addEventListener('click', function() {
+        bfsIterative(cellData[0], cellData);
+    }, false);
+    document.getElementById('bfsRecursive').addEventListener('click', function() {
+        alert("Work in progress");
+    }, false);
+
+    //dfsRecursive(cellData[0], cellData)
 }
 
-    const timer = ms => new Promise(res => setTimeout(res, ms))
+const timer = ms => new Promise(res => setTimeout(res, ms))
 
-// async function dfs(startPos, targetPos, grid) {
-//     const visited = [];
-//     const stack = [];
-//     const root = startPos;
-//     const target = targetPos;
-//     target.isTarget = true;
-//
-//     stack.push(root);
-//
-//     while (stack.length) {
-//
-//         const current = stack.pop();
-//
-//         let cellToColor = document.getElementsByClassName('cell-' + current.cellNumber);
-//
-//         if (visited.indexOf(current) !== -1) {
-//
-//             continue;
-//         }
-//
-//         if (current.cellNumber !== 0) {
-//             cellToColor[0].style.background = 'mediumpurple'
-//         }
-//         visited.push(current);
-//
-//         if (current === target) {
-//             cellToColor[0].style.background='springgreen'
-//             visited.push(current);
-//             break;
-//         }
-//
-//         for (let node of current.adjacentCells) {
-//             stack.push(grid[node]);
-//         }
-//         await timer(50);
-//     }
-//     console.log(visited, 'Congrats')
-// }
+async function dfs(startPos, targetPos, grid) {
+    const visited = [];
+    const stack = [];
+    const root = startPos;
+    const target = targetPos;
 
-async function iterativeDfs(grid, vertex, target) {
+    stack.push(root);
 
-    let stack = [];
-    stack.push(vertex);
+    while(stack.length) {
+        const current = stack.pop();
+        let cellToColor = document.getElementsByClassName('cell-'+current.cellNumber);
 
-    let cellToColor = document.getElementsByClassName('cell-' + vertex.cellNumber);
-
-    while (stack.length) {
-
-        if (vertex === target) {
-            console.log("Congrats, you reached the final cell ");
-            break
+        if (current === target) {
+            cellToColor[0].style.background='springgreen'
+            visited.push(current);
+            console.log(visited, 'Congrats')
+            return current;
         }
+        if (visited.indexOf(current) !== -1) {
+            continue;
+        }
+        if(current.cellNumber !== 0){
+            cellToColor[0].style.background='mediumpurple'
+        }
+        visited.push(current);
 
+        for (let node of current.adjacentCells) {
+            stack.push(grid[node]);
+        }
+        await timer(50);
+    }
+}
+
+const path = [];
+
+async function dfsIterative(vertex, grid) {
+    const target = grid[grid.length-1]
+    const stack = [];
+    stack.push(vertex);
+    while(stack.length) {
+        if (vertex === target) {
+            console.log('you reached cell ' + vertex.cellNumber + ' : Congrats')
+            console.log('Optimal Path : ', path)
+            displayPath(path, grid.length-1);
+            return;
+        }
         vertex = stack.pop();
-
         if (!vertex.visited) {
             vertex.visited = true;
             stack.push(vertex);
-            console.log(vertex.cellNumber);
-
+            path.push(vertex.cellNumber);
             for (let node of vertex.adjacentCells) {
-                cellToColor[0].style.background = 'mediumpurple';
-                stack.push(grid[node])
+                stack.push(grid[node]);
             }
         }
-        await timer(50)
     }
 }
+
+async function dfsRecursive(vertex, grid) {
+    const target = grid[grid.length-1]
+    path.push(vertex.cellNumber)
+    vertex.visited = true;
+    if(vertex === target) {
+        console.log('you reached cell ' + vertex.cellNumber + ' : Congrats');
+        console.log('path', path);
+        displayPath(path, grid.length-1);
+        return true;
+    }
+    for (let node of vertex.adjacentCells.reverse()) {
+        if(!grid[node].visited) {
+            if (await dfsRecursive(grid[node], grid)) {
+                return true;
+            }
+        }
+    }
+}
+
+async function bfsIterative(vertex, grid) {
+    const target = grid[grid.length-1]
+    const stack = [];
+    stack.push(vertex);
+    while(stack.length) {
+        if (vertex === target) {
+            console.log('you reached cell ' + vertex.cellNumber + ' : Congrats')
+            console.log('Optimal Path : ', path)
+            displayPath(path, grid.length-1);
+            return;
+        }
+        vertex = stack.shift();
+        if (!vertex.visited) {
+            vertex.visited = true;
+            stack.push(vertex);
+            path.push(vertex.cellNumber);
+            for (let node of vertex.adjacentCells) {
+                stack.push(grid[node]);
+            }
+        }
+    }
+}
+
+async function displayPath(optimalPath, lastCell) {
+    let displayDfsPath
+    for (let i = 0; i < optimalPath.length; i++) {
+        if (optimalPath[i] !== 0) {
+            displayDfsPath = document.getElementsByClassName('cell-' + optimalPath[i]);
+            if (optimalPath[i] !== lastCell) {
+                displayDfsPath[0].style.background = 'mediumpurple';
+            } else {
+                displayDfsPath[0].style.background = 'springgreen';
+            }
+        }
+        await timer(50);
+    }
+}
+
 
 async function main() {
     // Async main function to call our maze generator functions
     createMaze(await loadJson());
 }
 
-main();
+main()

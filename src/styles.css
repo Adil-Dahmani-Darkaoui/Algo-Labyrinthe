@@ -11,3 +11,12 @@ h1 {
     justify-content: center;
     align-items: center;
 }
+.btn {
+    font-size: 24px !important;
+}
+.m10 {
+    margin: 10px;
+}
+.p30 {
+    padding: 30px
+}
