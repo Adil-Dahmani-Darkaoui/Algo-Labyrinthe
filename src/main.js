@@ -1,10 +1,10 @@
-async function loadJson() {
+async function loadJson(size, ex) {
 
     const data = await fetch('labyrinthes.json')
         .then(response => response.json());
 
-    let gridSize = 15;
-    let mazeName = 'ex-0';
+    let gridSize = size;
+    let mazeName = 'ex-'+ex;
     // console.log(data)
     return {
         gridSize: gridSize,
@@ -74,12 +74,9 @@ function createMaze(mazeBoard) {
         dfsRecursive(cellData[0], cellData);
     }, false);
     document.getElementById('bfsIterative').addEventListener('click', function() {
+        createMaze()
         bfsIterative(cellData[0], cellData);
     }, false);
-    document.getElementById('bfsRecursive').addEventListener('click', function() {
-        alert("Work in progress");
-    }, false);
-
     //dfsRecursive(cellData[0], cellData)
 }
 
@@ -196,14 +193,16 @@ async function displayPath(optimalPath, lastCell) {
                 displayDfsPath[0].style.background = 'springgreen';
             }
         }
-        await timer(50);
+        await timer(30);
     }
 }
 
 
 async function main() {
     // Async main function to call our maze generator functions
-    createMaze(await loadJson());
+    let size = parseInt(prompt("Choice a maze size between 3 to 25"));
+    let ex = parseInt(prompt("Choice a design between 0, 1 or 2"));
+    createMaze(await loadJson(size, ex));
 }
 
 main()
